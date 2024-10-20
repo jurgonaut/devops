@@ -1,4 +1,4 @@
-from flask import render_template, request, url_for, redirect, Blueprint, current_app
+from flask import render_template, request, url_for, redirect, Blueprint, current_app, make_response, session
 from database import get_db_connection
 
 route_blueprint = Blueprint('route_blueprint', __name__)
@@ -13,7 +13,9 @@ def index():
     books = cur.fetchall()
     cur.close()
     conn.close()
-    return render_template('index.html', books=books)
+    resp = make_response(render_template('index.html', books=books))
+    resp.headers.set('host', current_app.config["NAME"])
+    return resp
 
 
 @route_blueprint.route('/create/', methods=('GET', 'POST'))
@@ -31,6 +33,7 @@ def create():
         if book:
             current_app.logger.debug("Book already exists!")
             return redirect(url_for('route_blueprint.index'))
+
         cur.execute('INSERT INTO books (title, author, pages_num, review)'
                     'VALUES (%s, %s, %s, %s)',
                     (title, author, pages_num, review))
@@ -39,7 +42,9 @@ def create():
         conn.close()
         return redirect(url_for('route_blueprint.index'))
 
-    return render_template('create.html')
+    resp = make_response(render_template('create.html'))
+    resp.headers.set('host', current_app.config["NAME"])
+    return resp
 
 
 @route_blueprint.route('/delete/', methods=('GET', 'POST'))
@@ -56,7 +61,9 @@ def delete():
         conn.close()
         return redirect(url_for('route_blueprint.index'))
 
-    return render_template('delete.html')
+    resp = make_response(render_template('delete.html'))
+    resp.headers.set('host', current_app.config["NAME"])
+    return resp
 
 
 @route_blueprint.route("/health")

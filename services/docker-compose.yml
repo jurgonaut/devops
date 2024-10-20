@@ -1,0 +1,55 @@
+services:
+  flask:
+    image: flask
+    build: flask
+    restart: always
+    volumes:
+      - ./flask/src:/app/src
+    environment:
+      NAME: test-app
+      DEPLOY_ENV: debug
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: user
+      DATABASE_PASS: password
+      DATABASE_SCHEMA: app
+    healthcheck:
+      test: python src/healthcheck.py
+      interval: 30s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
+    depends_on:
+      - postgres
+    profiles: [dev]
+
+  postgres:
+    image: "docker.io/postgres:16"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: app
+    profiles: [dev]
+
+  nginx:
+    image: nginx
+    build: nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - flask
+    profiles: [dev]
+
+  locust:
+    image: locust
+    build: locust
+    environment:
+      TARGET_HOST: http://flask:5000/
+      USERS: 1
+      SPAWNRATE: 1
+      TIME: 10
+    volumes:
+      - ./locust/src:/locust/src
+    ports:
+      - "8089:8089"
+    profiles: [perf]

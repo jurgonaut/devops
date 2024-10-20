@@ -9,9 +9,8 @@ RUN apt-get update && \
 RUN mkdir -p /app/src
 WORKDIR /app
 
-COPY src/ src
-COPY requirements.txt .
-COPY entrypoint.sh .
+COPY src/ ./src
+COPY requirements.txt entrypoint.sh .
 
 RUN pip3 install -r requirements.txt
 

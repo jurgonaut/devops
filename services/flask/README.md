@@ -10,3 +10,8 @@ db migration in docker
 ```bash
 docker-compose exec flask python src/db-init.py
 ```
+
+run tests in docker
+```bash
+docker-compose exec flask pytest src/tests
+```

@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 import os
 
 
@@ -8,7 +8,10 @@ def create_app():
     from routes import route_blueprint
     app.register_blueprint(route_blueprint)
 
+    app.config["NAME"] = os.environ.get("NAME", "app")
+
     return app
+
 
 # When running with Gunicorn
 app = create_app()
