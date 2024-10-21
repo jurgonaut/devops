@@ -1,1 +1,2 @@
 https://octopus.com/blog/ecs-canary-deployments
+https://medium.com/@williamdonze/grafana-monitor-nginx-proxy-manager-website-4d03b60c761f

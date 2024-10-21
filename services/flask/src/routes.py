@@ -1,4 +1,4 @@
-from flask import render_template, request, url_for, redirect, Blueprint, current_app, make_response, session
+from flask import render_template, request, url_for, redirect, Blueprint, current_app, make_response
 from database import get_db_connection
 
 route_blueprint = Blueprint('route_blueprint', __name__)
@@ -6,7 +6,7 @@ route_blueprint = Blueprint('route_blueprint', __name__)
 
 @route_blueprint.route("/")
 def index():
-    current_app.logger.debug('Processing route /')
+    # current_app.logger.debug('Processing route /')
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute('SELECT * FROM books;')

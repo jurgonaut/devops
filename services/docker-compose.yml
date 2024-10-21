@@ -19,6 +19,8 @@ services:
       timeout: 30s
       retries: 3
       start_period: 60s
+    ports:
+      - "5000:5000"
     depends_on:
       - postgres
     profiles: [dev]
@@ -36,6 +38,8 @@ services:
     build: nginx
     ports:
       - "80:80"
+    volumes:
+      - ./data/nginx:/var/log/nginx
     depends_on:
       - flask
     profiles: [dev]
@@ -44,7 +48,8 @@ services:
     image: locust
     build: locust
     environment:
-      TARGET_HOST: http://flask:5000/
+      # TARGET_HOST: http://flask:5000/
+      TARGET_HOST: http://nginx/
       USERS: 1
       SPAWNRATE: 1
       TIME: 10
@@ -53,3 +58,30 @@ services:
     ports:
       - "8089:8089"
     profiles: [perf]
+
+  grafana:
+    image: "docker.io/grafana/grafana:11.2.2-security-01-ubuntu"
+    ports:
+      - "3000:3000"
+    environment:
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: "/var/lib/grafana/dashboards/website-all.json"
+    volumes:
+      - ./monitoring/grafana/datasources/ds.yaml:/etc/grafana/provisioning/datasources/ds.yaml
+      - ./monitoring/grafana/dashboards/all.yaml:/etc/grafana/provisioning/dashboards/all.yml
+      - ./monitoring/grafana/dashboards/website-all.json:/var/lib/grafana/dashboards/website-all.json
+    profiles: [monitor]
+
+  loki:
+    image: "docker.io/grafana/loki:3.1.2"
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/config.yaml:/etc/loki/local-config.yaml
+    profiles: [monitor]
+
+  promtail:
+    image: "docker.io/grafana/promtail:3.2.1"
+    volumes:
+      - ./monitoring/promtail/config.yaml:/etc/promtail/config.yml
+      - ./data/nginx:/var/log/nginx
+    profiles: [monitor]
